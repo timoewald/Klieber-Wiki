@@ -1,0 +1,215 @@
+<!--
+title: RaspberryPi 4 - KlieberDA
+description: Server in Darmstadt
+published: false
+date: 2022-06-02T21:32:07.874Z
+tags: darmstadt
+editor: ckeditor
+dateCreated: 2022-06-02T21:32:00.709Z
+-->
+
+<h1>RaspberryPi 4 - KlieberDA</h1>
+<h2>Dokumentation (Installationsverlauf)</h2>
+<ol>
+  <li>Raspberry OS von Website installiert</li>
+  <li>SSH und WLAN Files angelegt</li>
+  <li><a href="https://raspberrytips.com/security-tips-raspberry-pi/">https://raspberrytips.com/security-tips-raspberry-pi/</a>
+    <ul>
+      <li>Automatische Sicherheitsupdates<ul>
+          <li><code>sudo apt install unattended-upgrades</code></li>
+          <li><code>sudo dpkg-reconfigure -plow unattended-upgrades</code></li>
+          <li><code>sudo nano /etc/apt/apt.conf.d/02periodic</code>
+            <ul>
+              <li><code>APT::Periodic::Enable "1";</code></li>
+              <li><code>APT::Periodic::Update-Package-Lists "1";</code></li>
+              <li><code>APT::Periodic::Download-Upgradeable-Packages "1";</code></li>
+              <li><code>APT::Periodic::Unattended-Upgrade "1";</code></li>
+              <li><code>APT::Periodic::AutocleanInterval "1";</code></li>
+              <li><code>APT::Periodic::Verbose "2";</code>
+                <ul>
+                  <li><code>sudo unattended-upgrades -d</code></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>Benutzer pi Passwort ändern<ul>
+      <li><code>Passwd</code></li>
+      <li>Neues Passwort: uS****82 (in Bitwarden)&nbsp;</li>
+    </ul>
+  </li>
+  <li>Neuen Benutzer anlegen und root machen<ul>
+      <li><code>sudo adduser <strong>klieberadminda</strong></code>
+        <ul>
+          <li>Passwort: n4****5Q (in Bitwarden)</li>
+        </ul>
+      </li>
+      <li><code>sudo adduser &lt;username&gt; sudo</code>
+        <ul>
+          <li><mark class="marker-pink">#TODO</mark> Es muss user pi noch deaktiviert werden!!!</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>Fail2ban installieren<ul>
+      <li><code>sudo apt install fail2ban</code></li>
+    </ul>
+  </li>
+  <li><a href="(https://phoscon.de/de/raspbee2/install)">RaspBee2&nbsp;</a>
+    <ul>
+      <li>RTC-Installation<ul>
+          <li>Abhängigkeiten installieren<ul>
+              <li><code>sudo apt update</code></li>
+              <li><code>sudo apt install i2c-tools build-essential raspberrypi-kernel-headers</code></li>
+            </ul>
+          </li>
+          <li>Installationsarchiv herunterladen<ul>
+              <li><code>curl -O -L&nbsp;</code><a href="https://github.com/dresden-elektronik/raspbee2-rtc/archive/master.zip"><code>https://github.com/dresden-elektronik/raspbee2-rtc/archive/master.zip</code></a></li>
+              <li><code>unzip master.zip</code></li>
+            </ul>
+          </li>
+          <li>in entpacktes Verzeichnis wechseln<ul>
+              <li><code>cd raspbee2-rtc-master</code></li>
+            </ul>
+          </li>
+          <li>RTC-Kernelmodul kompilieren<ul>
+              <li><code>make</code></li>
+            </ul>
+          </li>
+          <li>RTC-Kernelmodul installieren<ul>
+              <li><code>sudo make install</code></li>
+            </ul>
+          </li>
+          <li>Raspi neustarten<ul>
+              <li><code>sudo reboot</code></li>
+            </ul>
+          </li>
+          <li>RTC mit Systemzeit konfigurieren<ul>
+              <li><code>sudo hwclock –systohc</code></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li>deCONZ Installation<ul>
+          <li>Zugriffsrechte der seriellen Schnittstelle für Nutzer setzen<ul>
+              <li><code>sudo raspi-config</code>
+                <ul>
+                  <li>first: <code>No</code>, second: <code>yes</code></li>
+                </ul>
+              </li>
+              <li>Phoscon Public-Key importieren<ul>
+                  <li><code>wget -O - </code><a href="http://phoscon.de/apt/deconz.pub.key"><code>http://phoscon.de/apt/deconz.pub.key</code></a></li>
+                  <li><code>sudo apt-key add -</code></li>
+                </ul>
+              </li>
+              <li>APT-Repository für deCONZ konfigurieren<ul>
+                  <li><code>sudo sh -c "echo 'deb&nbsp;</code><a href="http://phoscon.de/apt/deconz%20/"><code>http://phoscon.de/apt/deconz \</code></a><code> $(lsb_release -cs)-beta main' &gt; \ /etc/apt/sources.list.d/deconz.list"</code></li>
+                </ul>
+              </li>
+              <li>APT-Paketliste aktualisieren<ul>
+                  <li><code>sudo apt update</code></li>
+                </ul>
+              </li>
+              <li>deCONZ installieren<ul>
+                  <li><code>sudo apt install deconz</code></li>
+                </ul>
+              </li>
+              <li>WiringPi aktualisieren (nur für Raspberry Pi 4B notwendig)<ul>
+                  <li><code>cd /tmp</code></li>
+                  <li><code>wget&nbsp;</code><a href="https://project-downloads.drogon.net/wiringpi-latest.deb"><code>https://project-downloads.drogon.net/wiringpi-latest.deb</code></a></li>
+                  <li><code>sudo dpkg -i wiringpi-latest.deb</code></li>
+                </ul>
+              </li>
+              <li>deCONZ zum Autostart hinzufügen<ul>
+                  <li><code>sudo systemctl enable deconz</code></li>
+                </ul>
+              </li>
+              <li>deCONZ Standart Port von 80 zu 8090 ändern und 433 Port von 433 zu 8081 ändern (damit Traefik läuft)<ul>
+                  <li><code>sudo nano /lib/systemd/system/deconz.service</code></li>
+                  <li><code>ExecStart=/usr/bin/deCONZ -platform minimal --http-port=80&nbsp; ⇒ ExecStart=/usr/bin/deCONZ -platform minimal --http-port=8090 --ws-port=8081</code></li>
+                  <li><code>sudo systemctl daemon-reload</code><br><code>sudo systemctl restart deconz</code></li>
+                </ul>
+              </li>
+              <li><code>sudo reboot</code></li>
+              <li><mark class="marker-pink">DA ES NICHT GING UND TRAEFIK DIE PORTS ALS BESETZT MELDETE STELLTE ICH FEST, DASS DIE ÄNDERUNGEN MIT DEN PORTS BEI DECONZ ZURÜCKGESETZT WURDEN: WTF???&nbsp; NACHDEM ICH DIES ÄNDERTE; UND IN DER HOMEASSISTANT CONFIGURATION DIE RICHTIGE TRAEFIK CONTAINER IPP ALS PROXY EINSTELLTE; GING WIEDER ALLES</mark></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>Docker (07.12.2021)<ul>
+      <li><code>curl -sSL https://get.docker.com | sh</code></li>
+      <li>um den aktuellen User zur docker Gruppe hinzuzufügen (ist nötig, damit Container ohne Root und sudo gestartet werden können)<ul>
+          <li><code>sudo usermod -aG docker ${USER}</code></li>
+        </ul>
+      </li>
+      <li>reboot</li>
+      <li><code>sudo apt install python3-pip -y</code></li>
+      <li><code>sudo pip3 install docker-compose</code></li>
+      <li><code>sudo systemctl enable docker</code></li>
+    </ul>
+  </li>
+  <li>Wireguard-VPN<ul>
+      <li>Installation über PiVPN<ul>
+          <li><code>curl -L https://install.pivpn.io | bash</code></li>
+          <li>Durchführen alles</li>
+          <li>Domain: vpn.ttp-wg.ddnss.de</li>
+          <li><code>pivpn add</code>
+            <ul>
+              <li>zunächst zwei Benutzer ersgtellt: klieberVPN_X1Yoga, klieberVPN_V30</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>Traefik-Container in Docker<ul>
+      <li><code>sudo apt-get install apache2-utils</code></li>
+      <li><code>htpasswd -nb admin secure_passwordd</code>
+        <ul>
+          <li>admin:$apr1$e21sA7.J$LuIA2I9pxP0B.dFW0Iy351</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>Telegraf Installation (außerhalb docker)<ul>
+      <li>Von Telegraf Website (hier die Debian Variante wählen): <a href="https://docs.influxdata.com/telegraf/v1.21/introduction/installation/">https://docs.influxdata.com/telegraf/v1.21/introduction/installation/</a>
+        <ul>
+          <li>Bei diesem Raspbian bullseye!!!:<ul>
+              <li>Statt <code>echo "deb https://repos.influxdata.com/${ID} ${VERSION_CODENAME} stable" | sudo tee /etc/apt/sources.list.d/influxdb.list</code></li>
+              <li>Das hier: <code>echo "deb https://repos.influxdata.com/debian bullseye stable" | sudo tee /etc/apt/sources.list.d/influxdb.list</code></li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li>Conf in <code>/etc/telegraf/.conf</code></li>
+    </ul>
+  </li>
+  <li>asdf</li>
+</ol>
+<p>&nbsp;</p>
+<h2>Docker-Container</h2>
+<ol>
+  <li>Portainer</li>
+  <li>Traefik</li>
+  <li>Vaultwarden (Bitwarden-Fork)</li>
+</ol>
+<h2>Zukunft</h2>
+<ul>
+  <li>externe Festplatte, die bei Bedarf gemountet wird (damit sie nur dann laufen muss)<ul>
+      <li>Backup von NAS in Seligenstadt</li>
+      <li>automatische Backups von diesem Raspi auf diese Platte</li>
+      <li>Sicherung dieser Platte auf NAS in Seligenstadt</li>
+    </ul>
+  </li>
+  <li>Docker [gemacht]<ul>
+      <li>Syncthing Ableger?</li>
+      <li>Traefik?</li>
+    </ul>
+  </li>
+</ul>
+<p>&nbsp;</p>

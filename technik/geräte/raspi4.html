@@ -1,0 +1,92 @@
+<!--
+title: RaspberryPi 4 - Klieber
+description: Hauptserver in Seligenstadt
+published: false
+date: 2022-06-02T21:05:21.115Z
+tags: server, raspi, raspberrypi, klieber
+editor: ckeditor
+dateCreated: 2022-03-23T23:14:28.971Z
+-->
+
+<h1>RaspberryPi 4 - Klieber</h1>
+<h2>Dokumentation (Installationsverlauf)</h2>
+<ol>
+  <li>Raspberry OS von Website installiert</li>
+  <li>SSH und WLAN Files angelegt</li>
+  <li><a href="https://raspberrytips.com/security-tips-raspberry-pi/">https://raspberrytips.com/security-tips-raspberry-pi/</a>
+    <ul>
+      <li>Automatische Sicherheitsupdates<ul>
+          <li><code>sudo apt install unattended-upgrades</code></li>
+          <li><code>sudo dpkg-reconfigure -plow unattended-upgrades</code></li>
+          <li><code>sudo nano /etc/apt/apt.conf.d/02periodic</code>
+            <ul>
+              <li><code>APT::Periodic::Enable "1";</code></li>
+              <li><code>APT::Periodic::Update-Package-Lists "1";</code></li>
+              <li><code>APT::Periodic::Download-Upgradeable-Packages "1";</code></li>
+              <li><code>APT::Periodic::Unattended-Upgrade "1";</code></li>
+              <li><code>APT::Periodic::AutocleanInterval "1";</code></li>
+              <li><code>APT::Periodic::Verbose "2";</code>
+                <ul>
+                  <li><code>sudo unattended-upgrades -d</code></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>Benutzer pi Passwort ändern<ul>
+      <li><code>Passwd</code></li>
+      <li>Neues Passwort: Gb************5x &nbsp;(in Bitwarden)</li>
+    </ul>
+  </li>
+  <li>Neuen Benutzer anlegen und root machen<ul>
+      <li><code>sudo adduser <strong>klieberadmin</strong></code>
+        <ul>
+          <li>Passwort: x2************XM (in Bitwarden)</li>
+        </ul>
+      </li>
+      <li><code>sudo adduser &lt;username&gt; sudo</code>
+        <ul>
+          <li><mark class="marker-pink">#TODO</mark> Es muss user pi noch deaktiviert werden!!!</li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>Docker (29.12.2021)<ul>
+      <li><code>curl -sSL https://get.docker.com | sh</code></li>
+      <li>um den aktuellen User zur docker Gruppe hinzuzufügen (ist nötig, damit Container ohne Root und sudo gestartet werden können)<ul>
+          <li><code>sudo usermod -aG docker ${USER}</code></li>
+        </ul>
+      </li>
+      <li>reboot</li>
+      <li><code>sudo apt install python3-pip -y</code></li>
+      <li><code>sudo pip3 install docker-compose</code></li>
+      <li><code>sudo systemctl enable docker</code></li>
+    </ul>
+  </li>
+  <li>Wireguard-VPN<ul>
+      <li>Installation über PiVPN<ul>
+          <li><code>curl -L https://install.pivpn.io | bash</code></li>
+          <li>Durchführen alles</li>
+          <li>Domain: vpn.klieber-ewald.ddnss.de</li>
+          <li>pivpn add<ul>
+              <li>zunächst zwei Benutzer ersgtellt: klieberVPN_X1Yoga, klieberVPN_V30</li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </li>
+  <li>diverse DockerContainer hinzugefügt</li>
+</ol>
+<hr>
+<h2>Docker-Container</h2>
+<ol>
+  <li>Portainer</li>
+  <li>Traefik</li>
+  <li>Vaultwarden (Bitwarden-Fork)</li>
+</ol>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
